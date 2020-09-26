@@ -1,0 +1,1 @@
+reference: [解析vue2.0的diff算法](https://github.com/aooy/blog/issues/2)
