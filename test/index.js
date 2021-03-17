@@ -1,4 +1,4 @@
-const { mount, h, patch } = JVN;
+const { mount, h, patch } = JVnode;
 
 const vnode1 = h('div', {
   attrs: {
