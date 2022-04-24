@@ -12,13 +12,17 @@ function renderData(el, vnode, oldVnode) {
   const { data } = vnode;
   if (!data) return;
   const { attrs, on } = data;
-  const oldOn = oldVnode && oldVnode.data && oldVnode.data.on;
-  for (let key in attrs) {
-    el.setAttribute(key, attrs[key]);
+  if (attrs) {
+    for (let key in attrs) {
+      el.setAttribute(key, attrs[key]);
+    }
   }
-  for (let evt in on) {
-    if (oldOn && oldOn[evt]) el.removeEventListener(evt, oldOn[evt]);
-    el.addEventListener(evt, on[evt]);
+  if (on) {
+    const oldOn = oldVnode && oldVnode.data && oldVnode.data.on;
+    for (let evt in on) {
+      if (oldOn && oldOn[evt]) el.removeEventListener(evt, oldOn[evt]);
+      el.addEventListener(evt, on[evt]);
+    }
   }
 }
 

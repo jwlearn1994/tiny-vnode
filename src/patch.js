@@ -92,7 +92,8 @@ function updateChildrens (
   let before;
 
   while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-    // 取回在 patch 時被設成 null 的 oldVnode
+    // 首先檢查 4 種情況，保證 oldStart/oldEnd/newStart/newEnd
+    // 這 4 個 vnode 非空，左側的 vnode 為空就右移下標，右側的 vnode 為空就左移 下標。
     if (oldStartVnode == null) {
       oldStartVnode = oldCh[++oldStartIdx];
     } else if (oldEndVnode == null) {
@@ -111,6 +112,14 @@ function updateChildrens (
       oldEndVnode = oldCh[--oldEndIdx];
       newEndVnode = newCh[--newEndIdx];
     // 需移動 node 的狀況
+    // 把獲得更新後的 (oldStartVnode/newEndVnode) 的 dom 右移，移動到
+    // oldEndVnode 對應的 dom 的右邊。為什麼這麼右移？
+    // （1）oldStartVnode 和 newEndVnode 相同，顯然是 vnode 右移了。
+    // （2）若 while 循環剛開始，那移到 oldEndVnode.elm 右邊就是最右邊，是合理的；
+    // （3）若循環不是剛開始，因為比較過程是兩頭向中間，那麼兩頭的 dom 的位置已經是
+    //     合理的了，移動到 oldEndVnode.elm 右邊是正確的位置；
+    // （4）記住，oldVnode 和 vnode 是相同的才 patch，且 oldVnode 自己對應的 dom
+    //     總是已經存在的，vnode 的 dom 是不存在的，直接復用 oldVnode 對應的 dom。
     } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
       patchVnode(oldStartVnode, newEndVnode);
       parentElm.insertBefore(oldStartVnode.el, oldEndVnode.el.nextSibling);
@@ -149,13 +158,13 @@ function updateChildrens (
       newStartVnode = newCh[++newStartIdx];
     }
   }
-  if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
-    if (oldStartIdx > oldEndIdx) {
-      before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].el
-      addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx);
-    } else {
-      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
-    }
+
+  if (newStartIdx <= newEndIdx) {
+    before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].el;
+    addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx);
+  }
+  if (oldStartIdx <= oldEndIdx) {
+    removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
   }
 }
 
